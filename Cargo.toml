@@ -1,0 +1,7 @@
+[workspace]
+members = [
+  "abstract" ,
+  "lib-file" ,
+  "cli-file" ,
+  "server-file"
+]
