@@ -1,67 +1,37 @@
 use serde::{Serialize , Deserialize};
-use chrono::prelude::*;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash , Hasher};
-use std::u64;
+use std::hash::Hash;
 use crate::setting;
 
 #[derive(Debug , PartialEq , Eq)]
 pub struct LinkObject {
-    pub id: Id,
+    pub id: setting::Id,
     pub content: Content
 }
 
 impl LinkObject {
-    pub fn new(content: Content) -> Self {
-        let id = Id::new(&content);
+    pub fn new(id: setting::Id , content: Content) -> Self {
         LinkObject {id , content}
     }
-}
-
-#[derive(Serialize , Deserialize , Debug , PartialEq , Eq)]
-pub struct Id {
-    id: u64,
-}
-
-impl Id {
-    pub fn new(content: &Content) -> Self {
-        let mut hash = DefaultHasher::new();
-        content.hash(&mut hash);
-        Id {id: hash.finish()}
-    }
-    pub fn temp(id: &String) -> Result<Self , Box<dyn std::error::Error>> {
-        let id = u64::from_str_radix(id , 16)?;
-        Ok(Id{id})
-    }
-    pub fn id(self: &Self) -> String {
-        format!("{:018x?}", self.id)
+    pub fn create(content: Content) -> Self {
+        let id = setting::Id::create(&content);
+        LinkObject {id , content}
     }
 }
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq)]
 pub struct Content {
-    info: Info,
+    info: setting::Info,
     body: Body
 }
 
 impl Content {
-    pub fn new(info: Info , body: Body) -> Self {
+    pub fn new(info: setting::Info , body: Body) -> Self {
         Content {body , info}
     }
-}
+    pub fn create(user: setting::User, body: Body) -> Self {
+        let info = setting::Info::create(user);
+        Content {info , body}
 
-#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq)]
-pub struct Info {
-    date: chrono::DateTime<Local>,
-    registrant: setting::User
-}
-
-impl Info {
-    pub fn create(user: setting::User) -> Self {
-        Info {date: Local::now() , registrant: user}
-    }
-    pub fn new(date: chrono::DateTime<Local> , user: setting::User) -> Self {
-        Info {date , registrant: user}
     }
 }
 
@@ -73,17 +43,13 @@ pub struct Body {
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq)]
 pub enum Kind {
-    InWeb,
-    InLocal,
-    InThisDir
+    Global,
+    Local,
+    UnderControl
 }
 
 impl Body {
-    pub fn new(local: bool, link: String) -> Self {
-        if local {
-            Body {kind: Kind::InLocal , link}
-        } else {
-            Body {kind: Kind::InWeb , link}
-        }
+    pub fn new(kind: Kind, link: String) -> Self {
+        Self {kind , link}
     }
 }
