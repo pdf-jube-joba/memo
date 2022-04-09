@@ -2,7 +2,7 @@ use serde::{Serialize , Deserialize};
 use std::hash::Hash;
 use crate::setting;
 
-#[derive(Debug , PartialEq , Eq)]
+#[derive(Serialize , Deserialize , Debug , PartialEq , Eq)]
 pub struct LinkObject {
     pub id: setting::Id,
     pub content: Content

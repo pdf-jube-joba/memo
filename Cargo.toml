@@ -1,7 +1,7 @@
 [workspace]
 members = [
-  "abstract" ,
-  "lib-file" ,
-  "cli-file" ,
+  "domain" ,
+  "infra_file" ,
+  "cli_file" ,
   "server-file"
 ]

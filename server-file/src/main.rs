@@ -1,16 +1,21 @@
-use actix_web::{get, web, App, HttpServer, Responder};
+use actix_web::{web, App, HttpServer};
+use ownlinkmemo_infra_file as lib;
 
-#[get("/hello/{name}")]
-async fn greet(name: web::Path<String>) -> impl Responder {
-    format!("Hello {name}!")
-}
+mod api;
 
-#[actix_web::main] // or #[tokio::main]
+#[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
+    let config: lib::config::Config = lib::config::Config {
+        target_dir: String::from("../"),
+        data_path: String::from(".memoData"),
+        links_path: String::from("Links")
+      };
+    
+    HttpServer::new(move || {
+        let config = config.clone();
         App::new()
-            .route("/hello", web::get().to(|| async { "Hello World!" }))
-            .service(greet)
+            .app_data(web::Data::new(move ||{config}))
+            .service(api::listup)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

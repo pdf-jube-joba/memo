@@ -848,14 +848,14 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "clap",
- "ownlinkmemo_data",
- "ownlinkmemo_lib_file",
+ "ownlinkmemo_domain",
+ "ownlinkmemo_infra_file",
  "serde",
  "serde_json",
 ]
 
 [[package]]
-name = "ownlinkmemo_data"
+name = "ownlinkmemo_domain"
 version = "0.1.0"
 dependencies = [
  "chrono",
@@ -864,11 +864,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "ownlinkmemo_lib_file"
+name = "ownlinkmemo_infra_file"
 version = "0.1.0"
 dependencies = [
  "chrono",
- "ownlinkmemo_data",
+ "ownlinkmemo_domain",
  "serde",
  "serde_json",
 ]
@@ -879,9 +879,8 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "askama",
- "chrono",
- "ownlinkmemo_data",
- "ownlinkmemo_lib_file",
+ "ownlinkmemo_domain",
+ "ownlinkmemo_infra_file",
  "serde",
  "serde_json",
 ]

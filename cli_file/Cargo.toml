@@ -6,8 +6,8 @@ edition = "2021"
 [features]
 
 [dependencies]
-ownlinkmemo_data = { path = "../abstract"}
-ownlinkmemo_lib_file = { path = "../lib-file"}
+ownlinkmemo_domain = { path = "../domain"}
+ownlinkmemo_infra_file = { path = "../infra_file"}
 serde = { version = "1.0", features = ["derive"]}
 serde_json = "1.0"
 chrono = "0.4"
