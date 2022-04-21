@@ -1,2 +1,5 @@
 pub mod config;
-pub mod links;
+pub mod link;
+pub mod word;
+pub mod article;
+pub mod temp;

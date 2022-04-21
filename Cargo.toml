@@ -1,7 +1,9 @@
 [workspace]
 members = [
   "domain" ,
+  "infra_testmemory" ,
   "infra_file" ,
   "cli_file" ,
-  "server-file"
+  "api_server" ,
+  "local_front_server"
 ]

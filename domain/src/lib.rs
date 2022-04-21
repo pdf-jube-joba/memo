@@ -1,3 +1,7 @@
 pub mod setting;
-pub mod links;
-pub mod words;
+pub mod link;
+/*
+pub mod word;
+pub mod article;
+pub mod temp;
+*/

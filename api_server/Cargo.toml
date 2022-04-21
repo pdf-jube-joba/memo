@@ -1,5 +1,5 @@
 [package]
-name = "ownlinkmemo_server_file"
+name = "ownlinkmemo_api_server"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 ownlinkmemo_domain = { path = "../domain"}
-ownlinkmemo_infra_file = { path = "../infra_file"}
+ownlinkmemo_infra_testmemory = { path = "../infra_testmemory"}
 serde = { version = "1.0", features = ["derive"]}
 serde_json = "1.0"
 askama = "0.11.1"

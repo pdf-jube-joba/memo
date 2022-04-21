@@ -686,6 +686,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "902eb695eb0591864543cbfbf6d742510642a605a61fc5e97fe6ceb5a30ac4fb"
 
 [[package]]
+name = "local_server"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "ownlinkmemo_api_server",
+ "ownlinkmemo_domain",
+ "ownlinkmemo_infra_testmemory",
+]
+
+[[package]]
 name = "lock_api"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -843,6 +853,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ownlinkmemo_api_server"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "askama",
+ "ownlinkmemo_domain",
+ "ownlinkmemo_infra_testmemory",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ownlinkmemo_cli_file"
 version = "0.1.0"
 dependencies = [
@@ -874,15 +896,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ownlinkmemo_server_file"
+name = "ownlinkmemo_infra_testmemory"
 version = "0.1.0"
 dependencies = [
- "actix-web",
- "askama",
  "ownlinkmemo_domain",
- "ownlinkmemo_infra_file",
- "serde",
- "serde_json",
 ]
 
 [[package]]
