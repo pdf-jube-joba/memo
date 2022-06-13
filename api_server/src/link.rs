@@ -1,20 +1,38 @@
 use ownlinkmemo_domain as domain;
-use actix_web::{get , post , web , App , HttpResponse , Responder};
+use actix_web::{web , HttpResponse};
+use std::sync::Mutex;
+use serde::{Serialize, Deserialize};
 
-pub async fn link_listup<T: domain::link::LinkRepository>(repo: web::Data<T>) -> HttpResponse {
+pub struct Repository {
+  pub repository: Mutex<domain::repository::Repository>
+}
+
+pub async fn link_search(repo: web::Data<Repository>) -> HttpResponse {
+  println!("hello");
   HttpResponse::Ok()
     .content_type("application/json")
-    .json(repo.listup())
+    .json(repo.repository.lock().unwrap().link_repository.search())
 }
 
-/*
-#[get("/links/{id}")]
-pub async fn link_get(config: web::Data<&lib::config::Config> , path: web::Path<String>) -> impl Responder {
-  match lib::link::search(&config, &path.into_inner()) {
-    Ok(obj) => HttpResponse::Ok()
-      .content_type("application/json")
-      .json(obj),
-    Err(_err) => HttpResponse::NotFound().finish()
+pub async fn link_pick(repo: web::Data::<Repository>, path: web::Path::<u64>) -> HttpResponse {
+  let id: domain::setting::Id = domain::setting::Id::from(path.into_inner());
+  match repo.repository.lock().unwrap().link_repository.pick(id) {
+    Ok(v) => HttpResponse::Ok().content_type("application/json").json(v),
+    Err(_) => HttpResponse::NotFound().finish()
   }
 }
-*/
+
+#[derive(Serialize, Deserialize)]
+pub struct NeededJson {
+  user: domain::setting::User,
+  info: domain::link::InfoUser,
+  body: domain::link::Body
+}
+
+pub async fn link_post(repo: web::Data::<Repository>, content: web::Json::<NeededJson>) -> HttpResponse {
+  let input: NeededJson = content.into_inner();
+  match repo.repository.lock().unwrap().link_repository.post(input.user, input.info, input.body) {
+    Ok(_) => HttpResponse::Ok().finish(),
+    Err(_) => HttpResponse::InternalServerError().finish()
+  }
+}

@@ -1,98 +1,111 @@
 use serde::{Serialize , Deserialize};
 use std::hash::Hash;
 use crate::setting;
+use chrono::prelude::*;
 
-#[derive(Serialize , Deserialize , Debug , PartialEq , Eq)]
+/*
+#[derive(Serialize , Deserialize , Debug , PartialEq , Eq , Clone)]
 pub struct WordObject {
-    pub id: setting::Id,
-    pub content: Content
+    id: setting::Id,
+    content: Content
 }
 
 impl WordObject {
     pub fn from(id: setting::Id , content: Content) -> Self {
         WordObject {id , content}
     }
+    pub fn content(self: &Self) -> &Content {
+        &self.content
+    }
+    pub fn id(self: &Self) -> &setting::Id {
+        &self.id
+    }
 }
 
-#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq)]
+#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct Content {
-    info: Info,
+    info_system: setting::InfoSystem,
+    info_user: InfoUser,
     body: Body
 }
 
 impl Content {
-    pub fn new(info: Info , body: Body) -> Self {
-        Content {info  , body}
+    pub fn from(info_system: setting::InfoSystem, info_user: InfoUser, body: Body) -> Self {
+        Self {info_system, info_user , body}
     }
-    pub fn create(user: setting::User , body: Body) -> Self {
-        let info = Info::new(user);
-        Content {info , body}
+    pub fn info_system(self: &Self) -> &setting::InfoSystem {
+        &self.info_system
     }
-}
-
-#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq)]
-pub struct Info {
-    pub info_system: setting::InfoSystem,
-    pub info_user: InfoUser
-}
-
-impl Info {
-    pub fn new (user: setting::User) -> Self {
-        Self {info_system: setting::InfoSystem::new(user) , info_user: InfoUser::new() }
+    pub fn info_user(self: &Self) -> &InfoUser {
+        &self.info_user
+    }
+    pub fn body(self: &Self) -> &Body {
+        &self.body
     }
 }
+*/
 
-#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq)]
+#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
+pub struct InfoSystem {
+    date: chrono::DateTime<Local>,
+    owner: setting::User
+}
+
+#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct InfoUser {
-    pub manager: Vec::<setting::User>
+    manager: Vec::<setting::User>
+}
+
+impl InfoSystem {
+    pub fn from(date: chrono::DateTime<Local>, owner: setting::User) -> Self {
+        Self {date , owner}
+    }
 }
 
 impl InfoUser {
-    pub fn new() -> Self {
-        Self {manager: Vec::new()}
-    }
     pub fn from(manager: Vec::<setting::User>) -> Self {
         Self {manager}
     }
+    pub fn manager(self: &mut Self) -> &mut Vec::<setting::User> {
+        &mut self.manager
+    }
 }
 
-#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq)]
+#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct Body {
     title: String,
     description: String,
-    main_content: Vec<TagObject>,
-    sub_content: Vec<TagObject>
+    linkto: Vec<TagObject>,
+    tag: Vec<TagObject>
 }
 
-#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq)]
+impl Body {
+    pub fn from(title: String, description: String, linkto: Vec<TagObject>, tag: Vec<TagObject>) -> Self {
+        Self {title , description , linkto , tag}
+    }
+    pub fn title(self: &mut Self) -> &mut String {
+        &mut self.title
+    }
+    pub fn description(self: &mut Self) -> &mut String {
+        &mut self.description
+    }
+    pub fn linkto(self: &mut Self) -> &mut Vec<TagObject> {
+        &mut self.linkto
+    }
+    pub fn tag(self: &mut Self) -> &mut Vec<TagObject> {
+        &mut self.tag
+    }
+}
+
+#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct TagObject {
     tag_type: String,
     tag_point: TagPoint
 }
 
-#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq)]
+#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub enum TagPoint {
     Link(setting::Id),
     Word(setting::Id),
     Undefined(String)
-}
-
-impl Body {
-    pub fn new(title: &String , description: &String) -> Self {
-        Self {
-            title: title.clone(),
-            description: description.clone(),
-            main_content: Vec::new(),
-            sub_content: Vec::new()
-        }
-    }
-    pub fn from(title: String, description: String, main_content: Vec<TagObject>, sub_content: Vec<TagObject>) -> Self {
-        Body {title , description , main_content , sub_content}
-    }
-    pub fn push_main(self: &mut Self , t: TagObject) {
-      self.main_content.push(t)
-    }
-    pub fn push_sub(self: &mut Self , t: TagObject) {
-      self.sub_content.push(t)
-    }
 }

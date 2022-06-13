@@ -5,14 +5,28 @@ use chrono::prelude::*;
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct User {
-    guest: u8
+    pub number: u8
 }
 
+/*
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct InfoSystem {
     date: chrono::DateTime<Local>,
     owner: User,
 }
+
+impl InfoSystem {
+    pub fn from(date: chrono::DateTime<Local>, owner: User) -> Self {
+        Self {date, owner}
+    }
+    pub fn date(self: &Self) -> &chrono::DateTime<Local> {
+        &self.date
+    }
+    pub fn owner(self: &Self) -> &User {
+        &self.owner
+    }
+}
+*/
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct Id {

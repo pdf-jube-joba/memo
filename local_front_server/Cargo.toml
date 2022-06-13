@@ -10,3 +10,5 @@ ownlinkmemo_domain = { path = "../domain" }
 ownlinkmemo_infra_testmemory = { path = "../infra_testmemory" }
 ownlinkmemo_api_server = { path = "../api_server" }
 actix-web = "4.0.1"
+actix-files = "0.6.0"
+env_logger = "0.9.0"
