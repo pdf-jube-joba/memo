@@ -23,14 +23,8 @@ impl Id {
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct InfoSystem {
-    date: chrono::DateTime<Local>,
+    created: chrono::DateTime<Local>,
     owner: shared::User
-}
-
-impl InfoSystem {
-    pub fn from(date: chrono::DateTime<Local>, owner: shared::User) -> Self {
-        Self {date , owner}
-    }
 }
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
@@ -38,36 +32,41 @@ pub struct InfoUser {
     manager: Vec::<shared::User>
 }
 
+impl InfoSystem {
+    pub fn from(created: chrono::DateTime<Local>, owner: shared::User) -> Self {
+        Self {created , owner}
+    }
+}
+
 impl InfoUser {
     pub fn from(manager: Vec::<shared::User>) -> Self {
         Self {manager}
+    }
+    pub fn manager(self: &mut Self) -> &mut Vec::<shared::User> {
+        &mut self.manager
     }
 }
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct Body {
     title: String,
-    article: String,
-    reference: Vec<TagObject>,
+    link: Vec<(String, TagObject)>,
     tag: Vec<TagObject>
 }
 
 impl Body {
-  pub fn from(title: String, article: String, reference: Vec<TagObject>, tag: Vec<TagObject>) -> Self {
-      Self {title , article , reference , tag}
-  }
-  pub fn title(self: &mut Self) -> &mut String {
-    &mut self.title
-  }
-  pub fn article(self: &mut Self) -> &mut String {
-    &mut self.article
-  }
-  pub fn reference(self: &mut Self) -> &mut Vec<TagObject> {
-    &mut self.reference
-  }
-  pub fn push_sub(self: &mut Self) -> &mut Vec<TagObject> {
-    &mut self.tag
-  }
+    pub fn from(title: String, link: Vec<(String,TagObject)>, tag: Vec<TagObject>) -> Self {
+        Self {title , link , tag}
+    }
+    pub fn title(self: &mut Self) -> &mut String {
+        &mut self.title
+    }
+    pub fn link(self: &mut Self) -> &mut Vec<(String, TagObject)> {
+        &mut self.link
+    }
+    pub fn tag(self: &mut Self) -> &mut Vec<TagObject> {
+        &mut self.tag
+    }
 }
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
@@ -79,15 +78,17 @@ pub struct TagObject {
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub enum TagPoint {
     Link(Id),
-    Word(Id),
-    Article(Id),
     Undefined(String)
 }
 
 pub struct Constructor {
-
+    registrant: shared::User,
+    title: String,
+    link: Vec<(String, TagObject)>,
+    tag: Vec<TagObject>
 }
 
 pub enum Modifier {
-
+    Title(String),
+    Link(Vec<(String, TagObject)>)
 }

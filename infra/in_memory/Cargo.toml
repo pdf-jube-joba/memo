@@ -1,0 +1,8 @@
+[package]
+name = "ownlinkmemo_in_memory"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ownlinkmemo_domain = { path = "../../domain" }
+chrono = { version = "0.4" , features = ["serde"]}

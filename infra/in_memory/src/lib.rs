@@ -2,12 +2,56 @@ use ownlinkmemo_domain as domain;
 use std::collections::HashMap;
 use chrono::prelude::*;
 
-#[derive(Clone)]
-pub struct TestLinkRepository {
+//#[derive(Clone)]
+pub struct TestRepository {
     next: u64,
-    repository: HashMap<domain::setting::Id, domain::repository::LinkContent>
+    repository: HashMap<domain::repository::Id, domain::repository::Memo>
 }
 
+impl domain::repository::MemoRepository for TestRepository {
+    fn search(&self) -> Vec<domain::repository::Id> {
+        self.repository.iter().map(|(x,_)| x.clone()).collect()
+    }
+    fn pick(&self, id: domain::repository::Id) -> Result<domain::repository::Memo, domain::repository::AccessError> {
+        match self.repository.get(&id) {
+            Some(ctn) => Ok(ctn.clone()),
+            None => Err(domain::repository::AccessError::NotFound)
+        }
+    }
+    fn post(&mut self, constructor: domain::repository::Constructor) -> Result<(), domain::repository::AccessError> {
+        match constructor {
+            domain::repository::Constructor::Link(cst) => {
+                let info_system: domain::link::InfoSystem = domain::link::InfoSystem::from(Local::now(), cst.registrant);
+                let info_user: domain::link::InfoUser = domain::link::InfoUser::from(cst.origin, cst.kind, cst.content_type);
+                let body: domain::link::Body = domain::link::Body::from(cst.link);
+                let obj: domain::repository::LinkObject = domain::repository::LinkObject::from(info_system, info_user, body);
+                let id: domain::repository::Id = domain::repository::Id::Link(domain::link::Id::from(self.next));
+                self.repository.insert(id, domain::repository::Memo::Link(obj));
+                self.next +=1;
+            }
+        }
+        Ok(())
+    }
+    fn modify(&mut self, id: domain::repository::Id, modifier: domain::repository::Modifier) -> Result<(), domain::repository::AccessError> {
+        match self.repository.get_mut(&id) {
+            Some(obj) => {
+                match (obj, modifier) {
+                    (domain::repository::Memo::Link(link), domain::repository::Modifier::Link(modifier)) => match modifier {
+                        domain::link::Modifier::Origin(origin) => {
+                            link.info_user().origin = origin;
+                            Ok(())
+                        }
+                    }
+                    _ => Err(domain::repository::AccessError::NotFound)
+                }
+            }
+            None => Err(domain::repository::AccessError::NotFound)
+        }
+    }
+}
+
+
+/* 
 impl domain::repository::LinkRepository for TestLinkRepository {
     fn search(&self) -> Vec<domain::setting::Id> {
         self.repository.iter().map(|(x,_)| x.clone()).collect()
@@ -163,7 +207,6 @@ pub fn init() -> domain::repository::Repository {
     }
 }
 
-/*
 pub fn testinit() -> domain::repository::Repository {
     let mut repo = init();
     let user: domain::setting::User = domain::setting::User{number: 0};
@@ -175,9 +218,7 @@ pub fn testinit() -> domain::repository::Repository {
     repo.link_repository.post(user, info_user, body).unwrap();
     repo
 }
-*/
 
-/*
 #[derive(PartialEq , Eq , Clone)]
 pub struct TestRepository<InfoUser, Body> {
     next: u64,

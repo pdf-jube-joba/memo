@@ -1,75 +1,77 @@
 use serde::{Serialize , Deserialize};
 use std::hash::Hash;
-use crate::{setting, link, word , article , temp};
+use crate::{shared, link, word , article , temp, content};
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub enum AccessError {
-  NotFound,
-  AlReadyExists
+    NotFound,
+    AlReadyExists
 }
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
-pub struct Content<InfoSystem, InfoUser, Body> {
-  info_system: InfoSystem,
-  info_user: InfoUser,
-  body: Body
+pub struct Object<InfoSystem, InfoUser, Body> {
+    info_system: InfoSystem,
+    info_user: InfoUser,
+    body: Body
 }
 
-impl<InfoSystem, InfoUser, Body> Content<InfoSystem, InfoUser, Body> {
-  pub fn from(info_system: InfoSystem, info_user: InfoUser, body: Body) -> Self {
-    Self {info_system, info_user, body}
-  }
-  pub fn info_system(&self) -> &InfoSystem {
-    &self.info_system
-  }
-  pub fn info_user(&self) -> &InfoUser {
-    &self.info_user
-  }
-  pub fn body(&self) -> &Body {
-    &self.body
-  }
+impl<InfoSystem, InfoUser, Body> Object<InfoSystem, InfoUser, Body> {
+    pub fn from(info_system: InfoSystem, info_user: InfoUser, body: Body) -> Self {
+        Self {info_system, info_user, body}
+    }
+    pub fn info_system(&mut self) -> &mut InfoSystem {
+        &mut self.info_system
+    }
+    pub fn info_user(&mut self) -> &mut InfoUser {
+        &mut self.info_user
+    }
+    pub fn body(&mut self) -> &mut Body {
+       &mut self.body
+    }
 }
 
-pub type LinkContent = Content<link::InfoSystem, link::InfoUser, link::Body>;
-pub type WordContent = Content<word::InfoSystem, word::InfoUser, word::Body>;
-pub type ArticleContent = Content<article::InfoSystem, article::InfoUser, article::Body>;
-pub type TempContent = Content<temp::InfoSystem, temp::InfoUser, temp::Body>;
+pub type LinkObject = Object<link::InfoSystem, link::InfoUser, link::Body>;
+pub type ContentObject = Object<content::InfoSystem, content::InfoUser, content::Body>;
+pub type WordObject = Object<word::InfoSystem, word::InfoUser, word::Body>;
+pub type ArticleObject = Object<article::InfoSystem, article::InfoUser, article::Body>;
+pub type TempObject = Object<temp::InfoSystem, temp::InfoUser, temp::Body>;
 
-pub trait LinkRepository {
-  fn search(&self) -> Vec<setting::Id>;
-  fn pick(&self, id: setting::Id) -> Result<LinkContent, AccessError>;
-  fn modify(&mut self, id: setting::Id, info: link::InfoUser, body: link::Body) -> Result<(), AccessError>;
-  fn post(&mut self, user: setting::User, info: link::InfoUser, body: link::Body) -> Result<(), AccessError>;
-  fn delete(&mut self, id: setting::Id) -> Result<(), AccessError>;
+#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
+
+pub enum Memo {
+    Link(LinkObject),
+    Word(WordObject),
+    Content(WordObject),
+    Article(ArticleObject),
+    Temp(TempObject)
 }
 
-pub trait WordRepository {
-  fn search(&self) -> Vec<setting::Id>;
-  fn pick(&self, id: setting::Id) -> Result<WordContent, AccessError>;
-  fn modify(&mut self, id: setting::Id, info: word::InfoUser, body: word::Body) -> Result<(), AccessError>;
-  fn post(&mut self, user: setting::User, info: word::InfoUser, body: word::Body) -> Result<(), AccessError>;
-  fn delete(&mut self, id: setting::Id) -> Result<(), AccessError>;
+#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
+
+pub enum Id {
+    Link(link::Id),
+    Content(content::Id),
+    Word(word::Id),
+    Article(article::Id),
+    Temp(temp::Id)
 }
 
-pub trait ArticleRepository {
-  fn search(&self) -> Vec<setting::Id>;
-  fn pick(&self, id: setting::Id) -> Result<ArticleContent, AccessError>;
-  fn modify(&mut self, id: setting::Id, info: article::InfoUser, body: article::Body) -> Result<(), AccessError>;
-  fn post(&mut self, user: setting::User, info: article::InfoUser, word: article::Body) -> Result<(), AccessError>;
-  fn delete(&mut self, id: setting::Id) -> Result<(), AccessError>;
+#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
+
+pub enum Constructor {
+    Link(link::Constructor)
 }
 
-pub trait TempRepository {
-  fn search(&self) -> Vec<setting::Id>;
-  fn pick(&self, id: setting::Id) -> Result<TempContent, AccessError>;
-  fn modify(&mut self, id: setting::Id, info: temp::InfoUser, body: temp::Body) -> Result<(), AccessError>;
-  fn post(&mut self, user: setting::User, info: temp::InfoUser, word: temp::Body) -> Result<(), AccessError>;
-  fn delete(&mut self, id: setting::Id) -> Result<(), AccessError>;
+#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
+
+pub enum Modifier {
+    Link(link::Modifier)
 }
 
-pub struct Repository {
-  pub link_repository: Box<dyn LinkRepository>,
-  pub word_repository: Box<dyn WordRepository>,
-  pub article_repository: Box<dyn ArticleRepository>,
-  pub temp_repository: Box<dyn TempRepository>
+pub trait MemoRepository {
+    fn search(&self) -> Vec<Id>;
+    fn pick(&self, id: Id) -> Result<Memo, AccessError>;
+    fn post(&mut self, constructor: Constructor) -> Result<(), AccessError>;
+    fn modify(&mut self, id: Id, modifier: Modifier) -> Result<(), AccessError>;
+//    fn delete(&mut self, id: Id) -> Result<(), AccessError>;
 }

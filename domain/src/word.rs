@@ -1,72 +1,48 @@
 use serde::{Serialize , Deserialize};
 use std::hash::Hash;
-use crate::setting;
+use crate::shared;
 use chrono::prelude::*;
 
-/*
-#[derive(Serialize , Deserialize , Debug , PartialEq , Eq , Clone)]
-pub struct WordObject {
-    id: setting::Id,
-    content: Content
-}
-
-impl WordObject {
-    pub fn from(id: setting::Id , content: Content) -> Self {
-        WordObject {id , content}
-    }
-    pub fn content(self: &Self) -> &Content {
-        &self.content
-    }
-    pub fn id(self: &Self) -> &setting::Id {
-        &self.id
-    }
-}
-
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
-pub struct Content {
-    info_system: setting::InfoSystem,
-    info_user: InfoUser,
-    body: Body
+pub struct Id {
+    pub id: u64,
 }
 
-impl Content {
-    pub fn from(info_system: setting::InfoSystem, info_user: InfoUser, body: Body) -> Self {
-        Self {info_system, info_user , body}
+impl Id {
+    pub fn from(id: u64) -> Self {
+        Self {id}
     }
-    pub fn info_system(self: &Self) -> &setting::InfoSystem {
-        &self.info_system
+    pub fn to_string(id: &Id) -> String {
+        id.id.to_string()
     }
-    pub fn info_user(self: &Self) -> &InfoUser {
-        &self.info_user
-    }
-    pub fn body(self: &Self) -> &Body {
-        &self.body
+    pub fn id_or(id: &String) -> Result<Self , Box<dyn std::error::Error>> {
+        let id = u64::from_str_radix(id , 16)?;
+        Ok(Self{id})
     }
 }
-*/
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct InfoSystem {
-    date: chrono::DateTime<Local>,
-    owner: setting::User
+    created: chrono::DateTime<Local>,
+    owner: shared::User
 }
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct InfoUser {
-    manager: Vec::<setting::User>
+    manager: Vec::<shared::User>
 }
 
 impl InfoSystem {
-    pub fn from(date: chrono::DateTime<Local>, owner: setting::User) -> Self {
-        Self {date , owner}
+    pub fn from(created: chrono::DateTime<Local>, owner: shared::User) -> Self {
+        Self {created , owner}
     }
 }
 
 impl InfoUser {
-    pub fn from(manager: Vec::<setting::User>) -> Self {
+    pub fn from(manager: Vec::<shared::User>) -> Self {
         Self {manager}
     }
-    pub fn manager(self: &mut Self) -> &mut Vec::<setting::User> {
+    pub fn manager(self: &mut Self) -> &mut Vec::<shared::User> {
         &mut self.manager
     }
 }
@@ -75,13 +51,13 @@ impl InfoUser {
 pub struct Body {
     title: String,
     description: String,
-    linkto: Vec<TagObject>,
+    reference: Vec<TagObject>,
     tag: Vec<TagObject>
 }
 
 impl Body {
-    pub fn from(title: String, description: String, linkto: Vec<TagObject>, tag: Vec<TagObject>) -> Self {
-        Self {title , description , linkto , tag}
+    pub fn from(title: String, description: String, reference: Vec<TagObject>, tag: Vec<TagObject>) -> Self {
+        Self {title , description , reference , tag}
     }
     pub fn title(self: &mut Self) -> &mut String {
         &mut self.title
@@ -89,8 +65,8 @@ impl Body {
     pub fn description(self: &mut Self) -> &mut String {
         &mut self.description
     }
-    pub fn linkto(self: &mut Self) -> &mut Vec<TagObject> {
-        &mut self.linkto
+    pub fn reference(self: &mut Self) -> &mut Vec<TagObject> {
+        &mut self.reference
     }
     pub fn tag(self: &mut Self) -> &mut Vec<TagObject> {
         &mut self.tag
@@ -105,7 +81,20 @@ pub struct TagObject {
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub enum TagPoint {
-    Link(setting::Id),
-    Word(setting::Id),
+    Link(Id),
+    Word(Id),
     Undefined(String)
+}
+
+pub struct Constructor {
+    registrant: shared::User,
+    title: String
+}
+
+pub enum Modifier {
+    Manager(Vec<shared::User>),
+    Title(String),
+    Description(String),
+    Reference(Vec<TagObject>),
+    Tag(Vec<TagObject>),
 }
