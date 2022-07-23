@@ -1,11 +1,17 @@
 use ownlinkmemo_domain as domain;
-use std::collections::HashMap;
+use std::{collections::HashMap, hash::Hash};
 use chrono::prelude::*;
 
 //#[derive(Clone)]
 pub struct TestRepository {
     next: u64,
     repository: HashMap<domain::repository::Id, domain::repository::Memo>
+}
+
+impl TestRepository {
+    pub fn init() -> Self {
+        Self {next: 0, repository: HashMap::new()}
+    }
 }
 
 impl domain::repository::MemoRepository for TestRepository {
@@ -38,7 +44,7 @@ impl domain::repository::MemoRepository for TestRepository {
                 match (obj, modifier) {
                     (domain::repository::Memo::Link(link), domain::repository::Modifier::Link(modifier)) => match modifier {
                         domain::link::Modifier::Origin(origin) => {
-                            link.info_user().origin = origin;
+                            link.info_user_mut().origin = origin;
                             Ok(())
                         }
                     }
@@ -49,7 +55,6 @@ impl domain::repository::MemoRepository for TestRepository {
         }
     }
 }
-
 
 /* 
 impl domain::repository::LinkRepository for TestLinkRepository {

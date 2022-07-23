@@ -2,6 +2,8 @@
 members = [
   "domain" ,
   "infra/in_memory" ,
+  "ui/gui",
+  "integrate/local_gui",
 #  "cli_file" ,
 #  "api_server" ,
 #  "local_front_server"

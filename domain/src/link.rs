@@ -19,8 +19,8 @@ impl Id {
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct InfoSystem {
-    created: chrono::DateTime<Local>,
-    owner: shared::User
+    pub created: chrono::DateTime<Local>,
+    pub owner: shared::User
 }
 
 impl InfoSystem {
@@ -71,8 +71,11 @@ impl Body {
     pub fn from(link: String) -> Self {
         Self {link}
     }
-    pub fn link(self: &mut Self) -> &String {
+    pub fn link_mut(self: &mut Self) -> &String {
         &mut self.link
+    }
+    pub fn link(self: &Self) -> &String {
+        &self.link
     }
 }
 

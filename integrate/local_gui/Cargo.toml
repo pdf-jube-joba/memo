@@ -1,0 +1,13 @@
+[package]
+name = "local_gui"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ownlinkmemo_domain = { path = "../../domain" }
+ownlinkmemo_in_memory = { path = "../../infra/in_memory" }
+ownlinkmemo_gui = { path = "../../ui/gui/" }
+eframe = "0.18.0"
+chrono = "0.4.19"
