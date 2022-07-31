@@ -6,9 +6,9 @@ const BUTTONPANEL_LENGTH: f32 = 50.0;
 const TILE_LENGTH: f32 = 150.0;
 
 pub enum View<'a> {
-    Home(Vec<(&'a mut domain::repository::Id, &'a mut Thumbnail)>),
-    InMemo(&'a mut MemoView),
-    CreateLink(&'a mut MemoView),
+    Home(Box<dyn Iterator<Item = (&'a mut domain::repository::Id, &'a mut Thumbnail)>>),
+    InMemo(MemoView),
+    CreateLink(MemoView),
 }
 
 pub enum Message {
@@ -25,7 +25,7 @@ fn or_op(o: &mut Option<Message>, r: Option<Message>) {
 }
 
 impl View<'_> {
-    pub fn default_view(mut self, ui: &mut egui::Ui) -> Option<Message> {
+    pub fn default_view(&mut self, ui: &mut egui::Ui) -> Option<Message> {
         let mut mes = None;
         egui::SidePanel::left("left")
         .resizable(false)

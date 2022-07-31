@@ -58,11 +58,11 @@ pub enum Memo {
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 
 pub enum Id {
-    Link(link::Id),
-    Content(content::Id),
-    Word(word::Id),
-    Article(article::Id),
-    Temp(temp::Id)
+    Link(shared::Id),
+    Content(shared::Id),
+    Word(shared::Id),
+    Article(shared::Id),
+    Temp(shared::Id)
 }
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]

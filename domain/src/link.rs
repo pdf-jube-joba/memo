@@ -4,20 +4,6 @@ use crate::shared;
 use chrono::prelude::*;
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
-pub struct Id {
-    pub id: u64,
-}
-
-impl Id {
-    pub fn from(id: u64) -> Self {
-        Self {id}
-    }
-    pub fn to_string(id: &Id) -> String {
-        id.id.to_string()
-    }
-}
-
-#[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub struct InfoSystem {
     pub created: chrono::DateTime<Local>,
     pub owner: shared::User
@@ -51,8 +37,8 @@ impl InfoUser {
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
 pub enum Origin {
     Nothing,
-    Creation(Id),
-    Download(Id)
+    Creation(shared::Id),
+    Download(shared::Id)
 }
 
 #[derive(Serialize , Deserialize , Debug , Hash , PartialEq , Eq , Clone)]
@@ -71,7 +57,7 @@ impl Body {
     pub fn from(link: String) -> Self {
         Self {link}
     }
-    pub fn link_mut(self: &mut Self) -> &String {
+    pub fn link_mut(self: &mut Self) -> &mut String {
         &mut self.link
     }
     pub fn link(self: &Self) -> &String {
