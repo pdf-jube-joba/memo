@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 ownlinkmemo_domain = { path = "../../domain" }
 egui = "0.18.1"
+chrono = { version = "0.4" , features = ["serde"]}

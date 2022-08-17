@@ -1,4 +1,5 @@
 use gui::Thumbnail;
+use infra::TestRepository;
 use ownlinkmemo_domain as domain;
 use ownlinkmemo_gui as gui;
 use ownlinkmemo_in_memory as infra;
@@ -6,70 +7,43 @@ use ownlinkmemo_domain::repository;
 use ownlinkmemo_domain::repository::MemoRepository;
 use eframe::egui;
 
-pub enum State {
-    Home,
-    InMemo(repository::Id, repository::Memo),
-    CreateLink(repository::Memo),
+pub struct State {
+    repo: TestRepository,
+    s: gui::State,
 }
 
-pub struct InRepo {
-    repo: infra::TestRepository,
-    cache: Vec<(repository::Id, repository::Memo, gui::Thumbnail)>,
-    view: State
-}
-
-impl InRepo {
-    pub fn reload(&mut self) {
-        let ids = self.repo.search();
-        let mut cache = Vec::new();
-        for id in ids.into_iter() {
-            let memo = self.repo.pick(id.clone()).unwrap();
-            let thumbnail = gui::Thumbnail::Default(memo.clone());
-            cache.push((id, memo, thumbnail));
-        }
-        self.cache = cache;
+impl Default for State {
+    fn default() -> Self {
+        let repo = TestRepository::init();
+        let s = gui::State::new(domain::shared::User { number: 0 });
+        Self{ repo, s }
     }
 }
 
-impl Default for InRepo {
-    fn default () -> Self {
-        let repo = infra::TestRepository::init();
-        let cache = Vec::new();
-        let view = State::Home;
-        Self{repo, cache, view}
-    }
-}
-
-impl eframe::App for InRepo {
+impl eframe::App for State {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-/*         match self.0 {
-            None => {
-                egui::CentralPanel::default().show(ctx, |ui|{
-                    ui.label("home");
-                    if ui.button("start").clicked() {
-                        *self = Window(Some(InRepo::default()));
-                    }
-                });
-            }
-            Some(ref mut repo) => {
-*/
-        let mut mes = None;
         egui::CentralPanel::default().show(ctx, |ui|{
-            match self.view {
-                State::Home => {
-                    self.reload();
-                    let g =
-                        self.cache.iter_mut().map(
-                            |(id, _memo, thumbnail)|{(id, thumbnail)}
-                        ).collect();
-                    let view = gui::View::Home(g);
-                    mes = view.default_view(ui);
-                }
-                State::InMemo(ref mut id, ref mut memo) => {
-                    
-                }
-                State::CreateLink(ref mut memo) => {
-
+            if let Some(mes) = self.s.step(ui) {
+                match mes {
+                    gui::MessageResponse::Search => {
+                        let ids = self.repo.search();
+                        let mut vec = Vec::new();
+                        for id in ids {
+                            let memo = self.repo.pick(id.clone()).unwrap();
+                            let thumbnail = gui::Thumbnail::Default;
+                            vec.push((id, memo, thumbnail));
+                        }
+                        let req = gui::ChangeRequest::Reload(vec);
+                        self.s.request_process(req);
+                    }
+                    gui::MessageResponse::Pick(id) => {
+                        let memo = self.repo.pick(id.clone()).unwrap();
+                        let req = gui::ChangeRequest::ViewMemo(id, memo);
+                        self.s.request_process(req);
+                    }
+                    gui::MessageResponse::Post(constructor) => {
+                        self.repo.post(constructor).unwrap();
+                    }
                 }
             }
         });
@@ -82,6 +56,6 @@ fn main() {
     eframe::run_native(
         "My egui App",
         options,
-        Box::new(|_cc| Box::new(InRepo::default())),
+        Box::new(|_cc| Box::new(State::default())),
     );
 }
