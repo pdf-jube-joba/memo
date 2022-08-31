@@ -10,11 +10,11 @@ pub struct AppState {
   view: View,
 }
 
-fn or_op(o: &mut Option<InnerMessage>, r: Option<InnerMessage>) {
-  match o {
-    None => {*o = r;}
-    Some(_) => {}
-  }
+fn insert_opt<T>(value: &mut Option<T>, subst: Option<T> ) {
+    match value {
+        None => {*value = subst;}
+        Some(_) => {}
+    }
 }
 
 impl AppState {
@@ -24,6 +24,16 @@ impl AppState {
             cache: Vec::new(),
             search: String::new(),
             view: View::Home,
+        }
+    }
+
+    pub fn step(&mut self, ui: &mut egui::Ui, req: Option<AppStateChangeRequest>) -> Option<MessageResponse> {
+        if let Some(req) = req {self.request_process(req);}
+        let mes = self.view(ui);
+        if let Some(mes) = mes {
+            self.inner_message_process(mes)
+        } else {
+            None
         }
     }
 
@@ -49,16 +59,6 @@ impl AppState {
                 };
                 self.view = View::InMemo(id, temp);
             }
-        }
-    }
-
-    pub fn step(&mut self, ui: &mut egui::Ui, req: Option<AppStateChangeRequest>) -> Option<MessageResponse> {
-        if let Some(req) = req {self.request_process(req);}
-        let mes = self.view(ui);
-        if let Some(mes) = mes {
-            self.inner_message_process(mes)
-        } else {
-            None
         }
     }
 
@@ -93,103 +93,86 @@ impl AppState {
     }
 
     pub fn view(&mut self, ui: &mut egui::Ui) -> Option<InnerMessage> {
-        let mut mes = None;
+        let mut mes: Option<InnerMessage> = None;
         egui::SidePanel::left("left")
         .resizable(false)
         .default_width(LEFTPANEL_LENGTH)
         .show_inside(ui, |ui|{
-            or_op(&mut mes, self.left(ui));
+            insert_opt(&mut mes, {
+                let state = match &self.view {
+                    View::Home => {SideMenuState::Home}
+                    View::InMemoLoad => {SideMenuState::InMemoLoad}
+                    View::InMemo(ref id,_) => {SideMenuState::InMemo(id.clone())}
+                    View::CreateLink(_) => {SideMenuState::CreateLink}
+                };
+                let view = SideMenuView {state, search: &mut self.search};
+                side_menu_view(view, ui).map(|mes|{
+                    match mes {
+                        SideMenuMessage::BackHome => InnerMessage::BackHome,
+                        SideMenuMessage::MakeView => InnerMessage::MakingView,
+                    }
+                })
+            }
+            );
         });
         egui::TopBottomPanel::bottom("buttom")
         .resizable(false)
         .default_height(BUTTONPANEL_LENGTH)
         .show_inside(ui, |ui|{
-            or_op(&mut mes, self.bottom(ui));
+            insert_opt(&mut mes, {
+                let mut str = "".to_string();
+                let state = match &self.view {
+                    View::Home => {StatusBarState::Home}
+                    View::InMemoLoad => {StatusBarState::Loading}
+                    View::InMemo(ref id,_) => {StatusBarState::InMemo}
+                    View::CreateLink(link) => {
+                        str = link.link.clone();
+                        StatusBarState::CreateLink
+                    }
+                };
+                let view = StatusBarView {state};
+                status_bar_view(view, ui).map(|mes|{
+                    match mes {
+                        StatusBarMessege::CreateLink => InnerMessage::CreateLink(CreateLink{link: str})
+                    }
+                })
+            });
         });
         egui::CentralPanel::default()
         .show_inside(ui, |ui|{
-            or_op(&mut mes, self.center(ui));
-        });
-        mes
-    }
-
-    fn left(&mut self, ui: &mut egui::Ui) -> Option<InnerMessage> {
-        let mut mes = None;
-        ui.separator();
-        match self.view {
-            View::Home => {ui.label("in Repo");}
-            View::InMemoLoad => {ui.label("memo loading");}
-            View::InMemo(_,_) => {ui.label("in Memo");}
-            View::CreateLink(_) => {ui.label("creating link");}
-        }
-        ui.separator();
-        ui.text_edit_singleline(&mut self.search);
-        if ui.button("Back Home").clicked() {
-            mes = Some(InnerMessage::BackHome)
-        }
-        if ui.button("make link").clicked() {
-            mes = Some(InnerMessage::MakingView)
-        }
-        mes
-    }
-
-    fn bottom(&mut self, ui: &mut egui::Ui) -> Option<InnerMessage>{
-        let mut mes = None;
-        ui.with_layout(egui::Layout::right_to_left(), |ui|{
-            match self.view {
-                View::Home => {ui.label("none");}
-                View::InMemoLoad => {ui.label("memo loading");}
-                View::InMemo(_,_) => {
-                    ui.label("change?");
-                }
-                View::CreateLink(CreateLink{ref link}) => {
-                    if ui.button("create").clicked() {
-                        mes = Some(InnerMessage::CreateLink(CreateLink{link: link.clone()}));
+            insert_opt(&mut mes, {
+                let view_list = ThumbnailListView{
+                    list: self.cache.iter().map(|(id,memo,thumbnail)|{
+                        (
+                            id.clone(),
+                            match thumbnail {
+                                Thumbnail::Loading(_) => ThumbnailView::Loading(None),
+                                Thumbnail::Default => ThumbnailView::Default(memo),
+                            }
+                        )
+                }).collect()};
+                match self.view {
+                    View::Home => {
+                        thumbnail_list_view(view_list, ui).map(|mes|{
+                            match mes {
+                                ThumbnailListMessage::Clicked(id) => InnerMessage::MoveTo(id)
+                            }
+                        })
+                    }
+                    View::InMemoLoad => {
+                        None
+                    }
+                    View::InMemo(ref mut id, ref mut memo) => {
+                        memo_view(memo.into() , ui);
+                        None
+                    }
+                    View::CreateLink(ref mut memo) => {
+                        memo_view(memo.into(), ui);
+                        None
                     }
                 }
-            };
+            });
         });
         mes
-    }
-
-    fn center(&mut self, ui: &mut egui::Ui) -> Option<InnerMessage> {
-        match self.view {
-            View::Home => {
-                let const_num = ((ui.available_width()) / TILE_LENGTH).floor() as i32;
-                let mut target = None;
-                let mut num = const_num;
-                egui::Grid::new("main")
-                .show(ui, |ui|{
-                    for (ref mut id,ref memo, thumbnail) in &mut self.cache {
-                        let thumbnailview =
-                        match thumbnail {
-                            Thumbnail::Loading(u) => ThumbnailView::Loading(u.clone()),
-                            Thumbnail::Default => ThumbnailView::Default(&memo)
-                        };
-                        if thumbnail_view(thumbnailview, ui) {
-                            target = Some(InnerMessage::MoveTo(id.clone()));
-                        }
-                        if num <= 0 {
-                            ui.end_row();
-                            num = const_num;
-                        } else {
-                            num = num - 1;
-                        }
-                    }
-                });
-                target
-            }
-            View::InMemoLoad => {
-                None
-            }
-            View::InMemo(ref mut _id, ref mut memo) => {
-                memo_view(memo.into(), ui);
-                None
-            }
-            View::CreateLink(ref mut creatememo) => {
-                memo_view(creatememo.into(), ui);
-                None
-            }
-        }
     }
 }

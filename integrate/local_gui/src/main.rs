@@ -50,11 +50,11 @@ impl eframe::App for State {
                     }
                 }
             }
+            ctx.request_repaint();
         });
     }
 }
-/*     }
-} */
+
 fn main() {
     let options = eframe::NativeOptions::default();
     eframe::run_native(
