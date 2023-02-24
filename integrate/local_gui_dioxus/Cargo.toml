@@ -1,0 +1,10 @@
+[package]
+name = "local_gui_dioxus"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ui_dioxus = { path = "../../ui/dioxus_test" }
+dioxus-desktop = "0.3.0"

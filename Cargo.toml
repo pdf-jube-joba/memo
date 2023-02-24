@@ -3,7 +3,9 @@ members = [
   "domain" ,
   "infra/in_memory" ,
   "ui/gui",
+  "ui/dioxus_test",
   "integrate/local_gui",
+  "integrate/local_gui_dioxus",
 #  "cli_file" ,
 #  "api_server" ,
 #  "local_front_server"
